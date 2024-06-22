@@ -1,0 +1,31 @@
+name: cp3
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.4.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_launcher_icons: ^0.13.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+  - assets/media/
+
+flutter_launcher_icons:
+  # Добавлять ли иконку в  андроид приложение
+  android: true
+  # Пусть до иконки в директории assets
+  image_path: "assets/media/appIcon.png"
+  # Дополнительные настройки
+  min_sdk_android: 21 # android min sdk min:16, default 21
