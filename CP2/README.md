@@ -1,4 +1,4 @@
-# flutter_application_1
+# CP2
 
 A new Flutter project.
 
