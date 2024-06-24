@@ -1,55 +1,77 @@
+import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:elementary/elementary.dart';
 import 'package:elementary_helper/elementary_helper.dart';
-import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
+// Модель
+class DataModel {
+  String data;
+
+  DataModel(this.data);
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+// ViewModel
+class DataViewModel extends ChangeNotifier {
+  final DataModel _dataModel;
 
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: CounterScreen(),
-    );
+  DataViewModel(this._dataModel);
+
+  String get data => _dataModel.data;
+
+  // Метод для загрузки данных
+  Future<void> fetchData() async {
+    Dio dio = Dio();
+    try {
+      // Запрос к API
+      final response = await dio.get(
+          'https://api.open-meteo.com/v1/forecast?latitude=55.751244&longitude=37.618423&hourly=temperature_2m');
+      if (response.statusCode == 200) {
+        // Если сервер вернул ответ "ОК", обновляем данные
+        _dataModel.data = response.data['hourly']['temperature_2m'][0];
+      } else {
+        // Если сервер не вернул ответ "ОК", используем запасные данные
+        _dataModel.data = 'Ошибка загрузки данных';
+      }
+    } catch (e) {
+      // Обработка исключений при запросе
+      _dataModel.data = 'Ошибка сети';
+    }
+    notifyListeners();
   }
 }
 
-class CounterScreen extends StatelessWidget {
-  const CounterScreen({super.key});
-
+// View
+class DataView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('MVVM')),
-      body: EntityStateNotifierBuilder<int>(
-        listenableEntityState: CounterModel().counterState,
-        builder: (context, count) {
-          return Center(
-            child: Text('Count: $count'),
+    final viewModel = DataViewModel(DataModel('Исходные данные'));
+
+    return ChangeNotifierProvider<DataViewModel>(
+      create: (context) => viewModel,
+      child: Consumer<DataViewModel>(
+        builder: (context, model, child) {
+          return Scaffold(
+            appBar: AppBar(title: Text('MVVM на Flutter')),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(model.data),
+                  ElevatedButton(
+                    onPressed: () => model.fetchData(),
+                    child: Text('Загрузить данные'),
+                  ),
+                ],
+              ),
+            ),
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          CounterModel().incrementCounter();
-        },
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }
 
-class CounterModel extends ElementaryModel {
-  final _counterState = EntityStateNotifier<int>(0);
-
-  EntityStateNotifier<int> get counterState => _counterState;
-
-  void incrementCounter() {
-    final currentCount = _counterState.value;
-    print(currentCount);
-    _counterState.content(currentCount + 1);
-  }
+void main() {
+  runApp(MaterialApp(home: DataView()));
 }

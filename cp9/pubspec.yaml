@@ -7,10 +7,12 @@ environment:
   sdk: '>=3.4.3 <4.0.0'
 
 dependencies:
+  dio: ^5.4.3+1
   elementary: ^3.0.0
   elementary_helper: ^1.0.1
   flutter:
     sdk: flutter
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:
